@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const HomeScreen(), // Our starting screen
+      home: const HomeScreen(),
     );
   }
 }
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchTodos(); // Fetch todos when the screen is initialized
+    _fetchTodos();
   }
 
   Future<void> _fetchTodos() async {
@@ -59,18 +59,18 @@ class _HomeScreenState extends State<HomeScreen> {
           _todos = data.map((item) => Todo.fromJson(item)).toList();
           _isLoading = false;
         });
-        print('Data fetched and parsed successfully!'); // <-- ADD THIS
+        print('Data fetched and parsed successfully!'); 
       } else {
         setState(() {
           _isLoading = false;
         });
-        print('Server error: ${response.statusCode}'); // <-- ADD THIS
+        print('Server error: ${response.statusCode}'); 
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print('An error occurred: $e'); // <-- ADD THIS
+      print('An error occurred: $e'); 
     }
   }
 
