@@ -46,31 +46,83 @@ class _HomeScreenState extends State<HomeScreen> {
     final uri = Uri.parse('https://doingflutter.sendiko.my.id/todos');
     print('Fetching data from: $uri');
     try {
-      final response = await http.get(
-        uri,
-        headers: {
-          'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
-        },
-      );
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _todos = data.map((item) => Todo.fromJson(item)).toList();
           _isLoading = false;
         });
-        print('Data fetched and parsed successfully!'); 
+        print('Data fetched and parsed successfully!');
       } else {
         setState(() {
           _isLoading = false;
         });
-        print('Server error: ${response.statusCode}'); 
+        print('Server error: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print('An error occurred: $e'); 
+      print('An error occurred: $e');
+    }
+  }
+
+  Future<void> _updateTodoStatus(Todo todo) async {
+    final uri = Uri.parse(
+      'https://doingflutter.sendiko.my.id/todos/${todo.id}',
+    );
+    try {
+      final response = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'completed': !todo.completed, 'title': todo.title}),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item updated successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update item, see logs for more detail'),
+          ),
+        );
+        print('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to update item: $e')));
+    }
+  }
+
+  Future<void> _deleteTodo(int id) async {
+    final uri = Uri.parse("https://doingflutter.sendiko.my.id/todos/$id");
+
+    try {
+      final response = await http.delete(uri);
+
+      if (response.statusCode == 204) {
+        setState(() {
+          _todos.removeWhere((todo) => todo.id == id);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item deleted successfully')),
+        );
+      } else {
+        print("Error deleting: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete item, see logs for more detail'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to delete item: $e')));
     }
   }
 
@@ -106,10 +158,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 return ListTile(
                   title: Text(todo.title),
                   leading: CircleAvatar(child: Text(todo.id.toString())),
-                  trailing: Icon(
-                    todo.completed ? Icons.check_circle : Icons.circle,
-                    color: todo.completed ? Colors.green : Colors.grey,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        todo.completed ? Icons.check_circle : Icons.circle,
+                        color: todo.completed ? Colors.green : Colors.grey,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          _deleteTodo(todo.id);
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
                   ),
+                  onTap: () {
+                    _updateTodoStatus(todo);
+                    _fetchTodos();
+                  },
                 );
               },
             ),
