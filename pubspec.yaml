@@ -11,6 +11,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   http: ^1.2.1
+  dio: ^5.4.3+1 # Add this line
+  flutter_bloc: ^8.1.5 # Add this line
+  equatable: ^2.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
