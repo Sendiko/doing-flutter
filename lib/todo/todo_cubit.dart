@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:doing_flutter/todo/todo_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 
 abstract class TodoState extends Equatable {
   const TodoState();
@@ -80,7 +77,7 @@ class TodoCubit extends Cubit<TodoState> {
     try {
       final response = await _dio.post(
         url,
-        data: {'title': title, 'completed': false}
+        data: {'title': title, 'completed': false},
       );
 
       if (response.statusCode == 201) {
